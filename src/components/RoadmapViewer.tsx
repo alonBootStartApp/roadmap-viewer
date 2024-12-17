@@ -203,7 +203,7 @@ export const RoadmapViewer = () => {
                             <Button
                                 onClick={() => document.getElementById('csvInput')?.click()}
                             >
-                                Import CSV1
+                                Import CSV
                             </Button>
                             <Button
                                 variant={filterDelayed ? "destructive" : "outline"}
