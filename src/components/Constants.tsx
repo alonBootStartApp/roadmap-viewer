@@ -21,7 +21,7 @@ interface Quarter {
 }
 
 export const quarters: Quarter[] = [
-    { id: 'Q4-2024', label: 'Q4 2024', start: '2024-10-01', end: '2024-12-31' },
+    // { id: 'Q4-2024', label: 'Q4 2024', start: '2024-10-01', end: '2024-12-31' },
     { id: 'Q1-2025', label: 'Q1 2025', start: '2025-01-01', end: '2025-03-31' },
     { id: 'Q2-2025', label: 'Q2 2025', start: '2025-04-01', end: '2025-06-30' },
     { id: 'Q3-2025', label: 'Q3 2025', start: '2025-07-01', end: '2025-09-30' },

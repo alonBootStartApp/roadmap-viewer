@@ -216,7 +216,7 @@ export const RoadmapViewer = () => {
                 </CardHeader>
             </Card>
 
-            <Tabs defaultValue="Q4-2024" className="w-full">
+            <Tabs defaultValue={quarters[0].id} className="w-full">
                 <TabsList className="mb-4">
                     {quarters.map(quarter => (
                         <TabsTrigger key={quarter.id} value={quarter.id}>
