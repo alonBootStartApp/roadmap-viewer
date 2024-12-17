@@ -1,9 +1,17 @@
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import React from "react";
-import {PROGRESS_CATEGORIES} from "@/components/Constants.tsx";
+import { PROGRESS_CATEGORIES } from "@/components/Constants.tsx";
 
-export const QuarterlyProgressChart = ({ items }) => {
+interface RoadmapItem {
+    actualProgress: number;
+}
+
+interface QuarterlyProgressChartProps {
+    items: RoadmapItem[];
+}
+
+export const QuarterlyProgressChart: React.FC<QuarterlyProgressChartProps> = ({ items }) => {
     const progressData = PROGRESS_CATEGORIES.map(category => {
         const count = items.filter(item => {
             const progress = Number(item.actualProgress);

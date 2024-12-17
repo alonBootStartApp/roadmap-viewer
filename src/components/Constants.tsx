@@ -1,4 +1,10 @@
-export const PROGRESS_CATEGORIES = [
+interface ProgressCategory {
+    name: string;
+    range: [number, number];
+    color: string;
+}
+
+export const PROGRESS_CATEGORIES: ProgressCategory[] = [
     { name: 'Not Started (0%)', range: [0, 0], color: '#EF4444' },
     { name: 'Early Stage (1-25%)', range: [1, 25], color: '#F59E0B' },
     { name: 'In Progress (26-50%)', range: [26, 50], color: '#3B82F6' },
@@ -7,8 +13,14 @@ export const PROGRESS_CATEGORIES = [
     { name: 'Completed (100%)', range: [100, 100], color: '#059669' }
 ];
 
-export const quarters = [
+interface Quarter {
+    id: string;
+    label: string;
+    start: string;
+    end: string;
+}
 
+export const quarters: Quarter[] = [
     { id: 'Q4-2024', label: 'Q4 2024', start: '2024-10-01', end: '2024-12-31' },
     { id: 'Q1-2025', label: 'Q1 2025', start: '2025-01-01', end: '2025-03-31' },
     { id: 'Q2-2025', label: 'Q2 2025', start: '2025-04-01', end: '2025-06-30' },

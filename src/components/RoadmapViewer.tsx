@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Calendar, AlertCircle, Zap } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import {
     Select,
     SelectContent,
@@ -16,15 +15,29 @@ import {quarters} from "@/components/Constants.tsx";
 import {QuarterlyProgressChart} from "@/components/QuarterlyProgressChart.tsx";
 import {getDevelopersList} from "@/components/Functions.tsx";
 
-export const RoadmapViewer = () => {
+interface RoadmapItem {
+    projectName: string;
+    subProject: string;
+    startDate: string;
+    endDate: string;
+    expectedProgress: number;
+    actualProgress: number;
+    quickWin: boolean;
+    isBackend: boolean;
+    isFrontend: boolean;
+    isAutomation: boolean;
+    isDevops: boolean;
+    isCyber: boolean;
+    name: string;
+    description: string;
+}
 
-    const [roadmapItems, setRoadmapItems] = useState([]);
+export const RoadmapViewer = () => {
+    const [roadmapItems, setRoadmapItems] = useState<RoadmapItem[]>([]);
     const [filterDelayed, setFilterDelayed] = useState(false);
     const [selectedProject, setSelectedProject] = useState("all");
     const [selectedSubProject, setSelectedSubProject] = useState("all");
     const [quickWinFilter, setQuickWinFilter] = useState("all");
-
-
 
     const uniqueProjects = useMemo(() => {
         const projects = new Set(roadmapItems.map(item => item.projectName));
@@ -45,29 +58,29 @@ export const RoadmapViewer = () => {
         return Array.from(subProjects).filter(Boolean).sort();
     }, [roadmapItems, selectedProject]);
 
-    const calculateProgress = (startDate, endDate) => {
+    const calculateProgress = (startDate: string, endDate: string): number => {
         const start = new Date(startDate);
         const end = new Date(endDate);
         const today = new Date();
 
-        const totalDays = (end - start) / (1000 * 60 * 60 * 24);
-        const daysElapsed = (today - start) / (1000 * 60 * 60 * 24);
+        const totalDays = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
+        const daysElapsed = (today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
 
         return Math.min(Math.max(Math.round((daysElapsed / totalDays) * 100), 0), 100);
     };
 
-    const handleFileUpload = (event) => {
-        const file = event.target.files[0];
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target?.files?.[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const text = e.target.result;
+                const text = e.target?.result as string;
                 const rows = text.split('\n');
                 const headers = rows[0].split(',');
 
                 const items = rows.slice(1).map(row => {
                     const values = row.split(',');
-                    const item = {};
+                    const item: any = {};
                     headers.forEach((header, index) => {
                         item[header.trim()] = values[index]?.trim();
                     });
@@ -90,12 +103,12 @@ export const RoadmapViewer = () => {
         }
     };
 
-    const handleProjectChange = (value) => {
+    const handleProjectChange = (value: string) => {
         setSelectedProject(value);
         setSelectedSubProject("all");
     };
 
-    const getItemsForQuarter = (quarterStart, quarterEnd) => {
+    const getItemsForQuarter = (quarterStart: string, quarterEnd: string) => {
         return roadmapItems.filter(item => {
             const itemStart = new Date(item.startDate);
             const itemEnd = new Date(item.endDate);
@@ -106,7 +119,7 @@ export const RoadmapViewer = () => {
         });
     };
 
-    const filterItems = (items) => {
+    const filterItems = (items: RoadmapItem[]) => {
         let filtered = items;
 
         if (selectedProject !== "all") {
@@ -188,7 +201,7 @@ export const RoadmapViewer = () => {
                                 id="csvInput"
                             />
                             <Button
-                                onClick={() => document.getElementById('csvInput').click()}
+                                onClick={() => document.getElementById('csvInput')?.click()}
                             >
                                 Import CSV
                             </Button>
@@ -287,4 +300,3 @@ export const RoadmapViewer = () => {
         </div>
     );
 };
-

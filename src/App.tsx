@@ -1,11 +1,10 @@
-import './App.css'
-import {RoadmapViewer} from "@/components/RoadmapViewer.tsx";
+import './App.css';
+import { RoadmapViewer } from "@/components/RoadmapViewer.tsx";
 
-function App() {
-
+function App(): JSX.Element {
     return (
-        <RoadmapViewer/>
-    )
+        <RoadmapViewer />
+    );
 }
 
-export default App
+export default App;
