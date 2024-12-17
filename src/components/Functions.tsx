@@ -7,7 +7,7 @@ interface RoadmapItem {
 }
 
 export const getDevelopersList = ({ item }: { item: RoadmapItem }): string => {
-    let developers: string[] = [];
+    let developers: string[] = []
     if (item.isBackend) {
         developers.push('Backend');
     }
