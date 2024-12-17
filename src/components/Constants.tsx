@@ -28,3 +28,24 @@ export const quarters: Quarter[] = [
     { id: 'Q4-2025', label: 'Q4 2025', start: '2025-10-01', end: '2025-12-31' },
     { id: 'Q1-2026', label: 'Q1 2026', start: '2026-01-01', end: '2026-03-31' },
 ];
+
+export const ROLES = [
+    'VP',
+    'DevOps',
+    'Team Leader',
+    'BE',
+    'FE',
+    'Researcher',
+    'Product',
+    'QA',
+    'Automation'
+]
+
+export const ROLES_ASSIGNED_TO_TASK = [
+    'DevOps',
+    'BE',
+    'FE',
+    'QA',
+    'Automation',
+    'Researcher'
+]

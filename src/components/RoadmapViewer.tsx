@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Calendar, AlertCircle, Zap } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import React, {useState, useMemo} from 'react';
+import {Card, CardHeader, CardTitle} from '@/components/ui/card';
+import {Tabs, TabsList, TabsTrigger, TabsContent} from '@/components/ui/tabs';
+import {Button} from '@/components/ui/button';
+import {Calendar, AlertCircle, Zap} from 'lucide-react';
+import {Alert, AlertDescription} from '@/components/ui/alert';
+import Papa from 'papaparse';
 import {
     Select,
     SelectContent,
@@ -11,9 +12,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {quarters} from "@/components/Constants.tsx";
+import {quarters, ROLES_ASSIGNED_TO_TASK} from "@/components/Constants.tsx";
 import {QuarterlyProgressChart} from "@/components/QuarterlyProgressChart.tsx";
 import {getDevelopersList} from "@/components/Functions.tsx";
+import {ActiveDevelopersChart} from "@/components/ActiveDevelopersChart.tsx";
 
 interface RoadmapItem {
     projectName: string;
@@ -32,13 +34,23 @@ interface RoadmapItem {
     description: string;
 }
 
+interface DeveloperItem {
+    name: string;
+    role: string;
+    profession: string;
+    department: string;
+
+}
+
 export const RoadmapViewer = () => {
     const [roadmapItems, setRoadmapItems] = useState<RoadmapItem[]>([]);
     const [filterDelayed, setFilterDelayed] = useState(false);
     const [selectedProject, setSelectedProject] = useState("all");
     const [selectedSubProject, setSelectedSubProject] = useState("all");
     const [quickWinFilter, setQuickWinFilter] = useState("all");
-
+    const [developersItems, setDevelopersItems] = useState<DeveloperItem[]>([]);
+    const [totalDevelopers, setTotalDevelopers] = useState(0);
+    const [totalDevelopersAssignedToActiveTasks, setTotalDevelopersAssignedToActiveTasks] = useState(0);
     const uniqueProjects = useMemo(() => {
         const projects = new Set(roadmapItems.map(item => item.projectName));
         return Array.from(projects).sort();
@@ -69,39 +81,69 @@ export const RoadmapViewer = () => {
         return Math.min(Math.max(Math.round((daysElapsed / totalDays) * 100), 0), 100);
     };
 
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleRMFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target?.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const text = e.target?.result as string;
-                const rows = text.split('\n');
-                const headers = rows[0].split(',');
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    const items = results.data.map((item: any) => {
+                        item.expectedProgress = calculateProgress(item.startDate, item.endDate);
+                        item.quickWin = item.quickWin?.toLowerCase() === 'true';
+                        item.isBackend = item.isBackend?.toLowerCase() === 'true';
+                        item.isFrontend = item.isFrontend?.toLowerCase() === 'true';
+                        item.isAutomation = item.isAutomation?.toLowerCase() === 'true';
+                        item.isDevops = item.isDevops?.toLowerCase() === 'true';
+                        item.isCyber = item.isCyber?.toLowerCase() === 'true';
+                        item.isActive = item.isActive?.toLowerCase() === 'true';
+                        item.developers = []
+                        for (let i = 1; i <= 7; i++) {
+                            let developer = item[`dev${i}`]?.trim();
+                            if (developer !== "") {
+                                item.developers.push(developer);
+                            }
 
-                const items = rows.slice(1).map(row => {
-                    const values = row.split(',');
-                    const item: any = {};
-                    headers.forEach((header, index) => {
-                        item[header.trim()] = values[index]?.trim();
+                        }
+                        return item;
                     });
-                    item.expectedProgress = calculateProgress(item.startDate, item.endDate);
-                    item.quickWin = item.quickWin?.toLowerCase() === 'true';
-                    item.isBackend = item.isBackend?.toLowerCase() === 'true';
-                    item.isFrontend = item.isFrontend?.toLowerCase() === 'true';
-                    item.isAutomation = item.isAutomation?.toLowerCase() === 'true';
-                    item.isDevops = item.isDevops?.toLowerCase() === 'true';
-                    item.isCyber = item.isCyber?.toLowerCase() === 'true';
-                    return item;
-                });
 
-                setRoadmapItems(items);
-                setSelectedProject("all");
-                setSelectedSubProject("all");
-                setQuickWinFilter("all");
-            };
-            reader.readAsText(file);
+                    setRoadmapItems(items);
+                    setSelectedProject("all");
+                    setSelectedSubProject("all");
+                    setQuickWinFilter("all");
+                }
+            });
         }
     };
+
+    const handleDevFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target?.files?.[0];
+        if (file) {
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    const items = results.data.map((item: any) => {
+                        item.name = item.Name?.trim();
+                        item.role = item.Role?.trim();
+                        item.profession = item.Proffesion?.trim();
+                        item.department = item.Department?.trim();
+                        return item;
+                    });
+                    setDevelopersItems(items);
+                    //get the count of unique developers in all the roadmap items which has isActive as true
+                    let uniqueDevelopers = roadmapItems.filter(item => item.isActive).map(item => item.developers).flat();
+                    uniqueDevelopers = [...new Set(uniqueDevelopers)];
+
+                    //get the count of developers which has roles in ROLES_ASSIGNED_TO_TASK
+                    let developersWithRoles = items.filter(item => ROLES_ASSIGNED_TO_TASK.includes(item.profession));
+                    setTotalDevelopers(developersWithRoles.length);
+                    setTotalDevelopersAssignedToActiveTasks(uniqueDevelopers.length);
+                }
+            });
+        }
+    }
 
     const handleProjectChange = (value: string) => {
         setSelectedProject(value);
@@ -152,7 +194,7 @@ export const RoadmapViewer = () => {
                         <div className="flex items-center gap-4 flex-wrap">
                             <Select value={selectedProject} onValueChange={handleProjectChange}>
                                 <SelectTrigger className="w-[200px]">
-                                    <SelectValue placeholder="Filter by project" />
+                                    <SelectValue placeholder="Filter by project"/>
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All Projects</SelectItem>
@@ -170,7 +212,7 @@ export const RoadmapViewer = () => {
                                 disabled={uniqueSubProjects.length === 0}
                             >
                                 <SelectTrigger className="w-[200px]">
-                                    <SelectValue placeholder="Filter by sub-project" />
+                                    <SelectValue placeholder="Filter by sub-project"/>
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All Sub-Projects</SelectItem>
@@ -184,7 +226,7 @@ export const RoadmapViewer = () => {
 
                             <Select value={quickWinFilter} onValueChange={setQuickWinFilter}>
                                 <SelectTrigger className="w-[200px]">
-                                    <SelectValue placeholder="Filter by quick wins" />
+                                    <SelectValue placeholder="Filter by quick wins"/>
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All Items</SelectItem>
@@ -196,14 +238,26 @@ export const RoadmapViewer = () => {
                             <input
                                 type="file"
                                 accept=".csv"
-                                onChange={handleFileUpload}
+                                onChange={handleRMFileUpload}
                                 className="hidden"
-                                id="csvInput"
+                                id="rmCsvInput"
                             />
                             <Button
-                                onClick={() => document.getElementById('csvInput')?.click()}
+                                onClick={() => document.getElementById('rmCsvInput')?.click()}
                             >
-                                Import CSV
+                                Import RM CSV
+                            </Button>
+                            <input
+                                type="file"
+                                accept=".csv"
+                                onChange={handleDevFileUpload}
+                                className="hidden"
+                                id="devCsvInput"
+                            />
+                            <Button
+                                onClick={() => document.getElementById('devCsvInput')?.click()}
+                            >
+                                Import Dev CSV
                             </Button>
                             <Button
                                 variant={filterDelayed ? "destructive" : "outline"}
@@ -230,7 +284,9 @@ export const RoadmapViewer = () => {
 
                     return (
                         <TabsContent key={quarter.id} value={quarter.id}>
-                            <QuarterlyProgressChart items={quarterItems} />
+                            {totalDevelopers ? <ActiveDevelopersChart totalDevelopers={totalDevelopers}
+                                                    activeDevelopers={totalDevelopersAssignedToActiveTasks}/> : ''}
+                            <QuarterlyProgressChart items={quarterItems}/>
 
                             <div className="space-y-4">
                                 {quarterItems.map((item, index) => (
@@ -263,7 +319,7 @@ export const RoadmapViewer = () => {
                                             <div className="w-full bg-gray-200 rounded-full h-2.5">
                                                 <div
                                                     className="bg-blue-600 h-2.5 rounded-full"
-                                                    style={{ width: `${item.expectedProgress}%` }}
+                                                    style={{width: `${item.expectedProgress}%`}}
                                                 ></div>
                                             </div>
                                             <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -273,7 +329,7 @@ export const RoadmapViewer = () => {
                                                             ? 'bg-green-500'
                                                             : 'bg-red-500'
                                                     }`}
-                                                    style={{ width: `${item.actualProgress}%` }}
+                                                    style={{width: `${item.actualProgress}%`}}
                                                 ></div>
                                             </div>
                                             <div className="flex justify-between text-sm">
@@ -284,9 +340,10 @@ export const RoadmapViewer = () => {
 
                                         {Number(item.actualProgress) < item.expectedProgress && (
                                             <Alert variant="destructive" className="mt-4">
-                                                <AlertCircle className="h-4 w-4" />
+                                                <AlertCircle className="h-4 w-4"/>
                                                 <AlertDescription>
-                                                    This item is behind schedule by {(item.expectedProgress - Number(item.actualProgress)).toFixed(1)}%
+                                                    This item is behind schedule
+                                                    by {(item.expectedProgress - Number(item.actualProgress)).toFixed(1)}%
                                                 </AlertDescription>
                                             </Alert>
                                         )}
