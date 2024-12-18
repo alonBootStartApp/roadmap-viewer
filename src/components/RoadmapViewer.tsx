@@ -30,8 +30,17 @@ interface RoadmapItem {
     isAutomation: boolean;
     isDevops: boolean;
     isCyber: boolean;
+    isActive: boolean;
     name: string;
     description: string;
+    dev1: string;
+    dev2: string;
+    dev3: string;
+    dev4: string;
+    dev5: string;
+    dev6: string;
+    dev7: string;
+    developers: string[];
 }
 
 interface DeveloperItem {
@@ -55,7 +64,7 @@ export const RoadmapViewer = () => {
         const projects = new Set(roadmapItems.map(item => item.projectName));
         return Array.from(projects).sort();
     }, [roadmapItems]);
-
+    console.log(developersItems)
     const uniqueSubProjects = useMemo(() => {
         let subProjects;
         if (selectedProject === "all") {

@@ -1,18 +1,15 @@
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
 import React from "react";
-import {PROGRESS_CATEGORIES} from "@/components/Constants.tsx";
 
-interface RoadmapItem {
-    actualProgress: number;
+
+interface ActiveDevelopersChartProps {
+    totalDevelopers: number;
+    activeDevelopers: number
 }
 
-interface QuarterlyProgressChartProps {
-    items: RoadmapItem[];
-}
-
-export const ActiveDevelopersChart: React.FC<QuarterlyProgressChartProps> = ({totalDevelopers, activeDevelopers}) => {
-    const progressData = [activeDevelopers, totalDevelopers - activeDevelopers].map((value, index) => {
+export const ActiveDevelopersChart: React.FC<ActiveDevelopersChartProps> = ({totalDevelopers, activeDevelopers}: any) => {
+    const progressData = [activeDevelopers, totalDevelopers - activeDevelopers].map((value: any, index: number) => {
         return {
             name: index === 0 ? 'Active' : 'Inactive',
             value: value,
