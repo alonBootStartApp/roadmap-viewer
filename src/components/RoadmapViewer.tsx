@@ -52,7 +52,7 @@ interface DeveloperItem {
 }
 
 export const RoadmapViewer = () => {
-    const [roadmapItems, setRoadmapItems] = useState<RoadmapItem[]>([]);
+    const [roadmapItems, setRoadmapItems] = useState<RoadmapItem[]>([])
     const [filterDelayed, setFilterDelayed] = useState(false);
     const [selectedProject, setSelectedProject] = useState("all");
     const [selectedSubProject, setSelectedSubProject] = useState("all");
